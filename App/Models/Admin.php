@@ -16,17 +16,26 @@ class Admin extends AbstractUser implements AuthInterface
 
     public function login($email, $password)
     {
-        if ($email === $this->email && $password === $this->password) {
+        if ($email === $this->email && password_verify($password, $this->password)) {
+            $_SESSION['user'] = [
+                'name' => $this->name,
+                'email' => $this->email,
+                'role' => $this->role
+            ];
+
             $this->logActivity("Admin {$this->name} logged in.");
-            return "Admin logged in successfully.";
+            return true;
         }
 
-        return "Invalid credentials.";
+        return false;
     }
 
     public function logout()
     {
-        $this->logActivity("Admin {$this->name} logged out.");
-        return "Admin logged out.";
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            $this->logActivity("Admin {$this->name} logged out.");
+            session_unset();
+            session_destroy();
+        }
     }
 }
